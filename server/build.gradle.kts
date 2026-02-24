@@ -19,6 +19,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
+    implementation("io.ktor:ktor-server-cors-jvm:3.3.3")
+    implementation("com.google.firebase:firebase-admin:9.4.2")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }

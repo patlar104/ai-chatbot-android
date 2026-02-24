@@ -12,9 +12,14 @@ internal data class BackendHttpResponse(
     val body: String,
 )
 
-internal expect suspend fun postChatRequest(url: String, payload: String): BackendHttpResponse
+internal expect suspend fun postChatRequest(
+    url: String,
+    payload: String,
+    headers: Map<String, String>,
+): BackendHttpResponse
 
 internal expect fun configuredBackendBaseUrl(): String?
+internal expect suspend fun backendAuthHeaders(): Map<String, String>
 
 class BackendRequestException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
@@ -26,10 +31,25 @@ object BackendChatClient {
             put("sessionId", sessionId)
         }.toString()
 
+        val authHeaders = try {
+            backendAuthHeaders()
+        } catch (error: Throwable) {
+            throw BackendRequestException(
+                message = "Could not prepare request auth headers: ${error.message ?: "Unknown error"}",
+                cause = error,
+            )
+        }
+
+        val requestHeaders = buildMap<String, String> {
+            put("X-Client-Platform", platformName())
+            putAll(authHeaders)
+        }
+
         val response = try {
             postChatRequest(
                 url = "${resolveBackendBaseUrl()}/chat",
                 payload = payload,
+                headers = requestHeaders,
             )
         } catch (error: Throwable) {
             throw BackendRequestException(
@@ -83,3 +103,5 @@ private fun extractErrorMessage(responseBody: String): String {
             ?.contentOrNull
     }.getOrNull().orEmpty()
 }
+
+private fun platformName(): String = getPlatform().name.lowercase()

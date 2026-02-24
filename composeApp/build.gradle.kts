@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.firebase.messaging)
             implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.appcheck.playintegrity)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -53,6 +54,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.kotlinx.serialization.json)
             implementation(projects.shared)
         }
         commonTest.dependencies {
@@ -103,6 +105,7 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+    debugImplementation(libs.firebase.appcheck.debug)
 }
 
 compose.desktop {

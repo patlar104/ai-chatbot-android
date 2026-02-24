@@ -3,6 +3,14 @@
 ## Goal
 Keep secrets out of source control and make feature integrations repeatable.
 
+## Command Discovery
+- Use the generic discovery runbook: `docs/tool-command-discovery.md`
+- Default workflow:
+  1. Use tool help (`--help`) from top-level to resource-level.
+  2. `list` resources before `describe`.
+  3. Validate state in structured output (`json`/`yaml`) before mutating.
+  4. Prefer generic discovery paths over brittle one-off commands.
+
 ## Standard Pattern For External Services
 1. Backend-only integration (never mobile API keys).
 2. Secret in cloud secret manager.
@@ -42,8 +50,18 @@ Keep secrets out of source control and make feature integrations repeatable.
 - `ops/cloud/deploy-ktor.sh`
 - `ops/cloud/deploy-ktor-source.sh`
 
+## Cost Hygiene Checklist
+1. Confirm active project/account context before any cleanup.
+2. Keep Cloud Run `min-instances=0` for non-critical services.
+3. Set reasonable `max-instances` per service workload profile.
+4. Remove stale Artifact Registry image digests not used by live revisions.
+5. Clean old source-deploy objects in Cloud Storage.
+6. Enforce Cloud Storage lifecycle policies for auto-deletion.
+7. Re-verify service health endpoints and IAM exposure after cleanup.
+
 ## Security Defaults
 - No secrets in `.env` committed files.
 - No secrets in Android code/resources.
 - Least-privilege service account permissions.
 - Rotate keys by adding a new secret version, then redeploy.
+- Reuse one existing runtime service account per environment when possible instead of creating new identities ad hoc.

@@ -1,6 +1,6 @@
 # Firebase Config Reference
 
-Last verified: 2026-02-24 14:49:48 EST
+Last verified: 2026-02-24 16:42:45 EST
 
 ## Active Environment
 - Mode: production Firebase project (not emulator mode)
@@ -10,6 +10,19 @@ Last verified: 2026-02-24 14:49:48 EST
 - Android app ID: `1:449116553609:android:ebb87c404f514983ce2158`
 - Firestore DB: `(default)` in `nam5` (Native mode)
 - Storage bucket: `ai-chatbot-3cd89.firebasestorage.app` in `US`
+
+## Operations Snapshot (2026-02-24)
+- Cloud Run services:
+  - `aichatbot-backend` deployed and serving with max scale set to `2`
+  - `aichatbot-genkit` deployed and serving with max scale set to `2`
+  - single invoker identity in use: `449116553609-compute@developer.gserviceaccount.com`
+  - `aichatbot-genkit` now requires authenticated invocation (public access removed)
+- Cloud Run source bucket: `run-sources-ai-chatbot-3cd89-us-central1`
+  - source zip history cleaned (`0` bytes currently)
+  - lifecycle rule enabled (auto-delete objects older than `14` days)
+- Artifact Registry repo: `cloud-run-source-deploy`
+  - stale image digests removed
+  - latest backend + genkit digests retained for active revisions
 
 ## Local Config Files
 - Firebase CLI project binding: `.firebaserc`

@@ -13,9 +13,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import java.io.IOException
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 data class ChatResult(
@@ -57,10 +59,15 @@ class GenkitFlowChatService(
             sessionId?.let { put("sessionId", it) }
         }.toString()
 
-        val request = HttpRequest.newBuilder()
+        val requestBuilder = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/chat"))
             .timeout(timeout)
             .header("Content-Type", "application/json")
+        resolveIdToken(baseUrl)?.let { token ->
+            requestBuilder.header("Authorization", "Bearer $token")
+        }
+
+        val request = requestBuilder
             .POST(HttpRequest.BodyPublishers.ofString(requestBody))
             .build()
 
@@ -94,6 +101,40 @@ class GenkitFlowChatService(
             reply = reply,
             model = model,
         )
+    }
+
+    private fun resolveIdToken(baseUrl: String): String? {
+        val uri = runCatching { URI.create(baseUrl) }.getOrNull() ?: return null
+        val scheme = uri.scheme?.lowercase()
+        if (scheme != "https") {
+            return null
+        }
+
+        val encodedAudience = URLEncoder.encode(baseUrl, StandardCharsets.UTF_8)
+        val tokenUri = URI.create(
+            "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=$encodedAudience"
+        )
+        val tokenRequest = HttpRequest.newBuilder()
+            .uri(tokenUri)
+            .timeout(Duration.ofSeconds(5))
+            .header("Metadata-Flavor", "Google")
+            .GET()
+            .build()
+
+        val tokenResponse = try {
+            client.send(tokenRequest, HttpResponse.BodyHandlers.ofString())
+        } catch (_: IOException) {
+            return null
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+            return null
+        }
+
+        if (tokenResponse.statusCode() !in 200..299) {
+            return null
+        }
+
+        return tokenResponse.body().trim().ifBlank { null }
     }
 
     companion object {

@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Per-user private files.
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Healthcheck files are stored at /healthchecks/{uid}/...
+    match /healthchecks/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Default deny; explicitly allow only known per-user paths.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

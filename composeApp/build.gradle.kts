@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 kotlin {
@@ -35,6 +36,13 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
+            implementation(libs.firebase.storage)
+            implementation(libs.firebase.messaging)
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -58,6 +66,11 @@ kotlin {
 }
 
 android {
+    val backendBaseUrl = providers
+        .gradleProperty("backendBaseUrl")
+        .orElse("https://aichatbot-backend-petuxudhua-uc.a.run.app")
+        .get()
+
     namespace = "org.example.ai.chatbot"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
@@ -67,6 +80,10 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "BACKEND_BASE_URL", "\"$backendBaseUrl\"")
+    }
+    buildFeatures {
+        buildConfig = true
     }
     packaging {
         resources {

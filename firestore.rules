@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Per-user root document.
+    match /users/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && request.resource.data.uid == request.auth.uid;
+    }
+
+    // Chat metadata scoped under each user.
+    match /users/{userId}/chats/{chatId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Chat messages scoped under each user's chat.
+    match /users/{userId}/chats/{chatId}/messages/{messageId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Optional flat history entries per user.
+    match /users/{userId}/history/{historyId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Healthcheck documents are stored at /healthchecks/{uid}.
+    match /healthchecks/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && request.resource.data.uid == request.auth.uid;
+    }
+
+    // Default deny; explicitly allow only known per-user paths.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

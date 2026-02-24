@@ -36,3 +36,15 @@ gcloud run services describe aichatbot-genkit --project ai-chatbot-3cd89 --regio
 - `org.gradle.java.home` points to local machine path: remove/avoid machine-specific JDK paths in `gradle.properties`.
 - Build running Java 25 (`25.0.2`) while project expects 21: set `GOOGLE_RUNTIME_VERSION=21`.
 - Android SDK missing during server cloud build: avoid default full-project `assemble` by setting `GOOGLE_GRADLE_BUILD_ARGS=:server:assemble -x test --build-cache`.
+
+## Local Java 25 Gradle startup failure
+- Symptom:
+  - `./gradlew :server:assemble` fails early with `java.lang.IllegalArgumentException: 25.0.2`.
+- Cause:
+  - Gradle 8.14.3 uses embedded Kotlin DSL tooling that does not parse Java 25 version strings for script compilation.
+- Project fix (committed):
+  - `gradle/gradle-daemon-jvm.properties` pins the Gradle daemon to Java 21 using Gradle's daemon JVM criteria.
+- Regenerate criteria if needed:
+```bash
+JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew updateDaemonJvm --jvm-version=21 --jvm-vendor=adoptium
+```

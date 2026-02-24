@@ -1,0 +1,16 @@
+{
+  "name": "aichatbot-genkit-service",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@genkit-ai/firebase": "^1.29.0",
+    "@genkit-ai/google-genai": "^1.29.0",
+    "@google-cloud/secret-manager": "^5.6.0",
+    "express": "^4.21.2",
+    "genkit": "^1.29.0"
+  }
+}

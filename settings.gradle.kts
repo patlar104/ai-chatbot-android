@@ -32,6 +32,10 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":composeApp")
+val serverOnlyBuild = (System.getenv("SERVER_ONLY_BUILD") ?: "false").toBoolean()
+
+if (!serverOnlyBuild) {
+    include(":composeApp")
+}
 include(":server")
 include(":shared")

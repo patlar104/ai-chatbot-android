@@ -39,8 +39,7 @@ fun Application.module(
     requestSecurityVerifier: RequestSecurityVerifier = FirebaseRequestSecurityVerifier.fromEnvironment(environment.log),
 ) {
     install(CORS) {
-        allowMethod(HttpMethod.Get)
-        allowMethod(HttpMethod.Post)
+        anyMethod()
         allowMethod(HttpMethod.Options)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Authorization)
